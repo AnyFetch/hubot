@@ -1,1 +1,1 @@
-web: bin/hubot -a flowdock -n Alexis
+web: bin/hubot -a flowdock -n Slave
