@@ -37,6 +37,12 @@ module.exports = function initDeploy(robot) {
       }
     }
 
+    for(var j = 0; j < apps.length; j += 1) {
+      if(!config.apps[apps[i]] && !(apps[i] === 'providers' || apps[i] === 'hydraters' || apps[i] === 'all')) {
+        return msg.send("Unknown app `" + apps[i] + "`");
+      }
+    }
+
     function callDeploy() {
       deploy(msg, apps, env);
     }
