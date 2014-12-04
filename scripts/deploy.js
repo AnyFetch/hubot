@@ -49,7 +49,7 @@ module.exports = function initDeploy(robot) {
 
     function no(msgNo) {
       eventConfirm.removeListener('yes', yes);
-      msgNo.send('Ok ! I cancel the deployment');
+      msgNo.send('Ok ! I cancel the deployment :cry:');
     }
 
     if(env === 'staging') {
