@@ -56,8 +56,8 @@ module.exports = function initDeploy(robot) {
       return callDeploy();
     }
 
-    eventConfirm.on('yes', yes);
-    eventConfirm.on('no', no);
+    eventConfirm.once('yes', yes);
+    eventConfirm.once('no', no);
 
     msg.reply('Are you sure ?');
   });
