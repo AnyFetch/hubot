@@ -8,7 +8,7 @@ function deploy(msg, apps, env) {
   request(config.opsUrl)
     .post('/deploy')
     .send({
-      end: env,
+      env: env,
       app: apps.join(' '),
       user: msg.envelope.user.name,
       password: config.password

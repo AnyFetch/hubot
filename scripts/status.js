@@ -61,9 +61,9 @@ module.exports = function initStatus(robot) {
     var message = '';
     var messageRepos = [];
 
-    var nbDiffs = 0;
+    var commitsCount = 0;
 
-    message += "Comparing " + diff + " on " + env + "\n";
+    message += "Comparing " + diff + " ";
 
     async.eachLimit(Object.keys(config.apps), 10, function(name, cb) {
       var ghrepo = client.repo(config.apps[name]);
@@ -79,8 +79,8 @@ module.exports = function initStatus(robot) {
 
         var messageRepo = '';
 
-        nbDiffs += 1;
-        messageRepo += "\n" + ghrepo.name + ' ( https://github.com/' + ghrepo.name + '/compare/' + diff + ' )' + "\n";
+        commitsCount += commits.length;
+        messageRepo += "\n" + ghrepo.name + ' ' + commits.length + ' commits behind ( https://github.com/' + ghrepo.name + '/compare/' + diff + ' )' + "\n";
 
         commits.forEach(function(commit) {
           messageRepo +=  "\t" + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + "\n";
@@ -95,8 +95,10 @@ module.exports = function initStatus(robot) {
         return msg.send(err.toString());
       }
 
-      if(nbDiffs === 0) {
-        message += "Everything up-to-date\n";
+      message += commitsCount + " commits behind\n";
+
+      if(commitsCount === 0) {
+        message += "\nEverything up-to-date\n";
       }
 
       Object.keys(messageRepos).sort().forEach(function(name) {
