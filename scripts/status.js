@@ -32,10 +32,10 @@ module.exports = function initStatus(robot) {
         }
 
         nbDiffs += 1;
-        message += ghrepo.name + '( https://github.com/' + ghrepo.name + '/compare/' + diff + ' )' + "\n";
+        message += "\n\n" + ghrepo.name + '( https://github.com/' + ghrepo.name + '/compare/' + diff + ' )' + "\n";
 
         commits.forEach(function(commit) {
-          message +=  "  " + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + "\n";
+          message +=  "   " + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + "\n";
         });
 
         cb();
