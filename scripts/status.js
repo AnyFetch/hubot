@@ -66,7 +66,7 @@ function generateMessage(name, diff, commits) {
 }
 
 module.exports = function initStatus(robot) {
-  robot.respond(/^status( on (staging|production))?$/i, function(msg) {
+  robot.respond(/status( on (staging|production))?$/i, function(msg) {
     var env = msg.match[2] || 'staging';
     var diff = env === 'staging' ? 'staging...master' : 'production...staging';
 
@@ -113,7 +113,7 @@ module.exports = function initStatus(robot) {
     });
   });
 
-  robot.respond(/^status of (.+?)$/i, function(msg) {
+  robot.respond(/status of (.+)$/i, function(msg) {
     var app = msg.match[1].trim();
 
     if(!config.apps[app]) {
@@ -146,7 +146,7 @@ module.exports = function initStatus(robot) {
 
       Object.keys(messages).sort().forEach(function(diff) {
         message += "Comparing " + diff + " ";
-        message += messages[diff];
+        message += messages[diff] + "\n";
       });
 
       msg.send(message);
