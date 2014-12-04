@@ -5,6 +5,7 @@
   "author": "Quentin Buathier <quentin.buathier@epitech.eu>",
   "description": "Hubot for Anyfetch deploying",
   "dependencies": {
+    "dotenv": "^0.4.0",
     "hubot": "^2.9.3",
     "hubot-diagnostics": "0.0.1",
     "hubot-flowdock": "^0.7.2",
