@@ -53,6 +53,18 @@ function initApps() {
 
 initApps();
 
+function generateMessage(name, diff, commits) {
+  var messageRepo = '';
+
+  messageRepo += name + ' ' + commits.length + ' commits behind ( https://github.com/' + name + '/compare/' + diff + ' )' + "\n";
+
+  commits.forEach(function(commit) {
+    messageRepo +=  "\t" + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + "\n";
+  });
+
+  return messageRepo;
+}
+
 module.exports = function initStatus(robot) {
   robot.respond(/^status( on (staging|production))?$/i, function(msg) {
     var env = msg.match[2] || 'staging';
@@ -77,17 +89,9 @@ module.exports = function initStatus(robot) {
           return cb();
         }
 
-        var messageRepo = '';
-
         commitsCount += commits.length;
-        messageRepo += "\n" + ghrepo.name + ' ' + commits.length + ' commits behind ( https://github.com/' + ghrepo.name + '/compare/' + diff + ' )' + "\n";
 
-        commits.forEach(function(commit) {
-          messageRepo +=  "\t" + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + "\n";
-        });
-
-        messageRepos[name] = messageRepo;
-
+        messageRepos[name] = generateMessage(ghrepo.name, diff, commits);
         cb();
       });
     }, function(err) {
@@ -102,11 +106,50 @@ module.exports = function initStatus(robot) {
       }
 
       Object.keys(messageRepos).sort().forEach(function(name) {
-        message += messageRepos[name];
+        message += "\n" + messageRepos[name];
       });
 
       msg.send(message);
     });
+  });
 
+  robot.respond(/^status of (.+?)$/i, function(msg) {
+    var app = msg.match[1].trim();
+
+    if(!config.apps[app]) {
+      return msg.send("Unknown app `" + app + "`");
+    }
+
+    var ghrepo = client.repo(config.apps[app]);
+    var messages = {};
+
+    async.eachSeries(['staging...master', 'production...staging'], function(diff, cb) {
+      ghrepo.compare(diff, function(err, commits) {
+        if(err) {
+          return cb(err);
+        }
+
+        if(commits.length === 0) {
+          messages[diff] = "0 commits behind\nEverything up-to-date\n";
+          return cb();
+        }
+
+        messages[diff] = commits.length + " commits behind\n" + generateMessage(ghrepo.name, diff, commits);
+        cb();
+      });
+    }, function(err) {
+      if(err) {
+        return msg.send(err.toString());
+      }
+
+      var message = '';
+
+      Object.keys(messages).sort().forEach(function(diff) {
+        message += "Comparing " + diff + " ";
+        message += messages[diff];
+      });
+
+      msg.send(message);
+    });
   });
 };
