@@ -3,6 +3,7 @@
 var request = require('supertest');
 
 var config = require('../config');
+var eventConfirm = require('./yes.js').event;
 
 function deploy(msg, apps, env) {
   request(config.opsUrl)
@@ -41,13 +42,13 @@ module.exports = function initDeploy(robot) {
     }
 
     function yes(msgYes) {
-      robot.removeListener('no', no);
+      eventConfirm.removeListener('no', no);
       msgYes.send("Let's go !");
       callDeploy();
     }
 
     function no(msgNo) {
-      robot.removeListener('yes', yes);
+      eventConfirm.removeListener('yes', yes);
       msgNo.send('Ok ! I cancel the deployment');
     }
 
@@ -55,8 +56,8 @@ module.exports = function initDeploy(robot) {
       return callDeploy();
     }
 
-    robot.on('yes', yes);
-    robot.on('no', no);
+    eventConfirm.on('yes', yes);
+    eventConfirm.on('no', no);
 
     msg.reply('Are you sure ?');
   });

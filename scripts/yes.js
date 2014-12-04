@@ -1,11 +1,16 @@
 'use strict';
 
+var EventEmitter = require('events').EventEmitter;
+var event = new EventEmitter();
+
 module.exports = function initYes(robot) {
   robot.hear(/^y(es)?$/, function(msg) {
-    robot.emit('yes', msg);
+    event.emit('yes', msg);
   });
 
   robot.hear(/^n(o)?$/, function(msg) {
-    robot.emit('no', msg);
+    event.emit('no', msg);
   });
 };
+
+module.exports.event = event;
