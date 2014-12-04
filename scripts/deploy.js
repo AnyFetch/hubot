@@ -23,7 +23,7 @@ function deploy(msg, apps, env) {
 }
 
 module.exports = function initDeploy(robot) {
-  robot.respond(/deploy (([^,]*)( ?, ?([^,]*))*)( on (staging|production))/i, function(msg) {
+  robot.respond(/deploy (([^,]*)( ?, ?([^,]*))*)( on (staging|production))?/i, function(msg) {
     var apps = msg.match[1].split(/,| /);
     var env = msg.match[6] || 'staging';
 
