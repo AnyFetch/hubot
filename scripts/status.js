@@ -54,7 +54,7 @@ function initApps() {
 initApps();
 
 module.exports = function initStatus(robot) {
-  robot.respond(/status( on (staging|production))?/i, function(msg) {
+  robot.respond(/^status( on (staging|production))?$/i, function(msg) {
     var env = msg.match[2] || 'staging';
     var diff = env === 'staging' ? 'staging...master' : 'production...staging';
 
