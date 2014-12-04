@@ -36,6 +36,28 @@ module.exports = function initDeploy(robot) {
       }
     }
 
-    deploy(msg, apps, env);
+    function callDeploy() {
+      deploy(msg, apps, env);
+    }
+
+    function yes(msgYes) {
+      robot.removeListener('no', no);
+      msgYes.send("Let's go !");
+      callDeploy();
+    }
+
+    function no(msgNo) {
+      robot.removeListener('yes', yes);
+      msgNo.send('Ok ! I cancel the deployment');
+    }
+
+    if(env === 'staging') {
+      return callDeploy();
+    }
+
+    robot.on('yes', yes);
+    robot.on('no', no);
+
+    msg.reply('Are you sure ?');
   });
 };
