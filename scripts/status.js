@@ -7,14 +7,17 @@ var config = require('../config');
 
 var client = github.client(config.githubToken);
 
-module.exports = function initDeploy(robot) {
+module.exports = function initStatus(robot) {
   robot.respond(/status( on (staging|production))?/i, function(msg) {
+    console.log("STATUS");
+
     var env = msg.match[2] || 'staging';
     var diff = env === 'staging' ? 'staging...master' : 'production...staging';
 
     var message = '';
+    var nbDiffs = 0;
 
-    message += "Comparing " + diff + "\n";
+    message += "Comparing " + diff + " on " + env + "\n";
 
     async.eachSeries(Object.keys(config.apps), function(name, cb) {
       var ghrepo = client.repo(config.apps[name]);
@@ -24,15 +27,26 @@ module.exports = function initDeploy(robot) {
           return cb(err);
         }
 
-        message += ghrepo.name + '( https://github.com/' + ghrepo.name + '/compare/' + diff + ' )';
+        if(commits.length === 0) {
+          return cb();
+        }
+
+        nbDiffs += 1;
+        message += ghrepo.name + '( https://github.com/' + ghrepo.name + '/compare/' + diff + ' )' + "\n";
 
         commits.forEach(function(commit) {
-          message +=  "  " + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0];
+          message +=  "  " + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + "\n";
         });
+
+        cb();
       });
     }, function(err) {
       if(err) {
         return msg.send(err.toString());
+      }
+
+      if(nbDiffs === 0) {
+        message += "Everything up-to-date\n";
       }
 
       msg.send(message);
