@@ -37,10 +37,9 @@ module.exports = function initDeploy(robot) {
       }
     }
 
-    console.log(apps);
     for(var j = 0; j < apps.length; j += 1) {
-      if(!config.apps[apps[i]] && !(apps[i] === 'providers' || apps[i] === 'hydraters' || apps[i] === 'all')) {
-        return msg.send("Unknown app `" + apps[i] + "`");
+      if(!config.apps[apps[j]] && !(apps[j] === 'providers' || apps[j] === 'hydraters' || apps[j] === 'all')) {
+        return msg.send("Unknown app `" + apps[j] + "`");
       }
     }
 

@@ -130,11 +130,11 @@ module.exports = function initStatus(robot) {
         }
 
         if(commits.length === 0) {
-          messages[diff] = "0 commits behind\nEverything up-to-date\n";
+          messages[diff] = "Everything up-to-date\n";
           return cb();
         }
 
-        messages[diff] = commits.length + " commits behind\n" + generateMessage(ghrepo.name, diff, commits);
+        messages[diff] = generateMessage(ghrepo.name, diff, commits);
         cb();
       });
     }, function(err) {
@@ -145,8 +145,8 @@ module.exports = function initStatus(robot) {
       var message = '';
 
       Object.keys(messages).sort().forEach(function(diff) {
-        message += "Comparing " + diff + " ";
-        message += messages[diff] + "\n";
+        message += "Comparing " + diff;
+        message += + "\n" + messages[diff] + "\n";
       });
 
       msg.send(message);
