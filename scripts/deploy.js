@@ -24,9 +24,9 @@ function deploy(msg, apps, env) {
 }
 
 module.exports = function initDeploy(robot) {
-  robot.respond(/deploy (.+?)(?: (?:on (staging|production))?$|$)/i, function(msg) {
-    var apps = msg.match[1].split(/,| /);
-    var env = msg.match[2] || 'staging';
+  robot.respond(/deploy (.+?)(?: (?:on (staging|production)\s*)?$|\s*$)/i, function(msg) {
+    var apps = msg.match[1].trim().toLowerCase().split(/,| /);
+    var env = msg.match[2].toLowerCase() || 'staging';
 
     for(var i = 0, c = apps.length; i < c; i += 1) {
       if(!apps[i]) {

@@ -66,8 +66,8 @@ function generateMessage(name, diff, commits) {
 }
 
 module.exports = function initStatus(robot) {
-  robot.respond(/status( on (staging|production))?$/i, function(msg) {
-    var env = msg.match[2] || 'staging';
+  robot.respond(/status( on (staging|production))?\s*$/i, function(msg) {
+    var env = msg.match[2].toLowerCase() || 'staging';
     var diff = env === 'staging' ? 'staging...master' : 'production...staging';
 
     var message = '';
@@ -113,8 +113,8 @@ module.exports = function initStatus(robot) {
     });
   });
 
-  robot.respond(/status of (.+)$/i, function(msg) {
-    var app = msg.match[1].trim();
+  robot.respond(/status of (.+)\s*$/i, function(msg) {
+    var app = msg.match[1].trim().toLowerCase();
 
     if(!config.apps[app]) {
       return msg.send("Unknown app `" + app + "`");

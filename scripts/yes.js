@@ -4,11 +4,11 @@ var EventEmitter = require('events').EventEmitter;
 var event = new EventEmitter();
 
 module.exports = function initYes(robot) {
-  robot.hear(/y(es)?$/, function(msg) {
+  robot.hear(/^\s*y(es)?\s*$/i, function(msg) {
     event.emit('yes', msg);
   });
 
-  robot.hear(/n(o)?$/, function(msg) {
+  robot.hear(/^\s*n(o)?\s*$/i, function(msg) {
     event.emit('no', msg);
   });
 };
