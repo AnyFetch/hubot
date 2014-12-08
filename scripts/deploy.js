@@ -1,3 +1,13 @@
+// Description
+//   Deploy apps to staging or production
+//
+// Dependencies
+//   None
+//
+// Commands:
+//   hubot deploy <apps> - deploy <apps> to staging
+//   hubot deploy <apps> on <env> - deploy <apps> to <env>
+
 'use strict';
 
 var request = require('supertest');

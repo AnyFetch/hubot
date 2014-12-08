@@ -1,3 +1,13 @@
+// Description
+//   Get status of apps on Github
+//
+// Dependencies
+//   None
+//
+// Commands:
+//   hubot status of <app> - get status of <app>
+//   hubot status on <env> - get status of all apps on <env>
+
 'use strict';
 
 var async = require('async');
