@@ -77,7 +77,7 @@ function generateMessage(name, diff, commits) {
 
 module.exports = function initStatus(robot) {
   robot.respond(/status( on (staging|production))?\s*$/i, function(msg) {
-    var env = msg.match[2].toLowerCase() || 'staging';
+    var env = (msg.match[2] || 'staging').toLowerCase();
     var diff = env === 'staging' ? 'staging...master' : 'production...staging';
 
     var message = '';
