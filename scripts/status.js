@@ -109,10 +109,11 @@ module.exports = function initStatus(robot) {
         return msg.send(err.toString());
       }
 
-      message += commitsCount + " commits behind\n";
-
       if(commitsCount === 0) {
         message += "\nEverything up-to-date\n";
+      }
+      else {
+        message += commitsCount + " commits behind in " + Object.keys(messageRepos).length + " repos\n";
       }
 
       Object.keys(messageRepos).sort().forEach(function(name) {
