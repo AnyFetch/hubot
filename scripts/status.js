@@ -69,7 +69,7 @@ function generateMessage(name, diff, commits) {
   messageRepo += name + ' ' + commits.length + ' commits behind ( https://github.com/' + name + '/compare/' + diff + ' )' + "\n";
 
   commits.forEach(function(commit) {
-    messageRepo +=  "\t" + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + " ( " + commit.author.login + " )\n";
+    messageRepo +=  "\t" + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + " (" + commit.author.login + ")\n";
   });
 
   return messageRepo;
