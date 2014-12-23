@@ -75,53 +75,65 @@ function generateMessage(name, diff, commits) {
   return messageRepo;
 }
 
+function sendStatusFor(env, msg, cb) {
+  var diff = env === 'staging' ? 'staging...master' : 'production...staging';
+
+  var message = '';
+  var messageRepos = [];
+
+  var commitsCount = 0;
+
+  message += "Comparing " + diff + " ";
+
+  async.eachLimit(Object.keys(config.apps), 10, function(name, cb) {
+    var ghrepo = client.repo(config.apps[name]);
+
+    ghrepo.compare(diff, function(err, commits) {
+      if(err) {
+        return cb(err);
+      }
+
+      if(commits.length === 0) {
+        return cb();
+      }
+
+      commitsCount += commits.length;
+
+      messageRepos[name] = generateMessage(ghrepo.name, diff, commits);
+      cb();
+    });
+  }, function(err) {
+    if(err) {
+      return msg.send(err.toString());
+    }
+
+    if(commitsCount === 0) {
+      message += "\nEverything up-to-date\n";
+    }
+    else {
+      message += commitsCount + " commits behind in " + Object.keys(messageRepos).length + " repos\n";
+    }
+
+    Object.keys(messageRepos).sort().forEach(function(name) {
+      message += "\n" + messageRepos[name];
+    });
+
+    msg.send(message);
+    cb();
+  });
+}
+
 module.exports = function initStatus(robot) {
   robot.respond(/status( on (staging|production))?\s*$/i, function(msg) {
-    var env = (msg.match[2] || 'staging').toLowerCase();
-    var diff = env === 'staging' ? 'staging...master' : 'production...staging';
+    var env = (msg.match[2] || 'all').toLowerCase();
 
-    var message = '';
-    var messageRepos = [];
+    if(env === 'all') {
+      return async.eachSeries(['staging', 'production'], function(env, cb) {
+        sendStatusFor(env, msg, cb);
+      }, function() {});
+    }
 
-    var commitsCount = 0;
-
-    message += "Comparing " + diff + " ";
-
-    async.eachLimit(Object.keys(config.apps), 10, function(name, cb) {
-      var ghrepo = client.repo(config.apps[name]);
-
-      ghrepo.compare(diff, function(err, commits) {
-        if(err) {
-          return cb(err);
-        }
-
-        if(commits.length === 0) {
-          return cb();
-        }
-
-        commitsCount += commits.length;
-
-        messageRepos[name] = generateMessage(ghrepo.name, diff, commits);
-        cb();
-      });
-    }, function(err) {
-      if(err) {
-        return msg.send(err.toString());
-      }
-
-      if(commitsCount === 0) {
-        message += "\nEverything up-to-date\n";
-      }
-      else {
-        message += commitsCount + " commits behind in " + Object.keys(messageRepos).length + " repos\n";
-      }
-
-      Object.keys(messageRepos).sort().forEach(function(name) {
-        message += "\n" + messageRepos[name];
-      });
-
-      msg.send(message);
-    });
+    sendStatusFor(env, msg, function() {});
   });
 
   robot.respond(/status of (.+)\s*$/i, function(msg) {
