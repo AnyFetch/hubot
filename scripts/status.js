@@ -124,7 +124,7 @@ function sendStatusFor(env, msg, cb) {
 }
 
 module.exports = function initStatus(robot) {
-  robot.respond(/status( on (staging|production))?\s*$/i, function(msg) {
+  robot.respond(/status( on (staging|production|all))?\s*$/i, function(msg) {
     var env = (msg.match[2] || 'all').toLowerCase();
 
     if(env === 'all') {
