@@ -8,7 +8,15 @@ module.exports = function initYes(robot) {
     event.emit('yes', msg);
   });
 
+  robot.respond(/^\s*y(es)?\s*$/i, function(msg) {
+    event.emit('yes', msg);
+  });
+
   robot.hear(/^\s*n(o)?\s*$/i, function(msg) {
+    event.emit('no', msg);
+  });
+
+  robot.respond(/^\s*n(o)?\s*$/i, function(msg) {
     event.emit('no', msg);
   });
 };
