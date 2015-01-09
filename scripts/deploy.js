@@ -15,13 +15,14 @@ var request = require('supertest');
 var config = require('../config');
 var eventConfirm = require('./yes.js').event;
 
-function deploy(msg, apps, env) {
+function deploy(msg, apps, env, twoFactorPassword) {
   request(config.opsUrl)
     .post('/deploy')
     .send({
       env: env,
       app: apps.join(' '),
       user: msg.envelope.user.name,
+      two_factor_password: twoFactorPassword,
       password: config.password
     })
     .end(function(err, res) {
@@ -34,9 +35,10 @@ function deploy(msg, apps, env) {
 }
 
 module.exports = function initDeploy(robot) {
-  robot.respond(/deploy (.+?)(?: (?:on (staging|production)\s*)?$|\s*$)/i, function(msg) {
+  robot.respond(/deploy (.+?)(?: (?:on (staging|production)\s*)?|\s*) using ([0-9]{6})$/i, function(msg) {
     var apps = msg.match[1].trim().toLowerCase().split(/,| /);
     var env = (msg.match[2] || 'staging').toLowerCase();
+    var twoFactorPassword = msg.match[3];
 
     for(var i = 0, c = apps.length; i < c; i += 1) {
       if(!apps[i]) {
@@ -54,7 +56,7 @@ module.exports = function initDeploy(robot) {
     }
 
     function callDeploy() {
-      deploy(msg, apps, env);
+      deploy(msg, apps, env, twoFactorPassword);
     }
 
     function yes(msgYes) {

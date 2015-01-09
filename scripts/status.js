@@ -15,8 +15,8 @@ var github = require('octonode');
 
 // Monkey patch to implement compare
 github.repo.prototype.compare = function(diff, cb) {
-  return this.client.get("repos/" + this.name + "/compare/" + diff, function(err, s, b, h) {
-    if (err) {
+  return this.client.get("repos/" + this.name + "/compare/" + diff, function(err, s, b) {
+    if(err) {
       return cb(err);
     }
 
