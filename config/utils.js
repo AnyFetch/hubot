@@ -15,6 +15,11 @@ module.exports.generateAppsList = function(apps) {
   var newApps = [];
 
   for(var i = 0, c = apps.length; i < c; i += 1) {
+    if(config.aliases[apps[i]]) {
+      newApps = newApps.concat(config.aliases[apps[i]]);
+      continue;
+    }
+
     if(!config.apps[apps[i]]) {
       return new Error("Unknown app : " + apps[i]);
     }
