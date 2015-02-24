@@ -15,8 +15,8 @@ var github = require('octonode');
 
 // Monkey patch to implement compare
 github.repo.prototype.compare = function(diff, cb) {
-  return this.client.get("repos/" + this.name + "/compare/" + diff, function(err, s, b, h) {
-    if (err) {
+  return this.client.get("repos/" + this.name + "/compare/" + diff, function(err, s, b) {
+    if(err) {
       return cb(err);
     }
 
@@ -25,43 +25,9 @@ github.repo.prototype.compare = function(diff, cb) {
 };
 
 var config = require('../config');
-config.apps = {};
+var utils = require('../config/utils');
 
 var client = github.client(config.githubToken);
-
-function initApps() {
-  console.log("Start of init apps");
-  var ghorg = client.org('Anyfetch');
-
-  ghorg.repos({
-    page: 1,
-    per_page: 150
-  }, function(err, repos) {
-    async.eachLimit(repos, 10, function(repo, cb) {
-      var ghrepo = client.repo(ghorg.name + '/' + repo.name);
-
-      ghrepo.tags(function(err, tags) {
-        tags = tags.map(function(tag) {
-          return tag.name;
-        });
-
-        if(tags.indexOf('staging') !== -1) {
-          config.apps[repo.name.split(/(-provider)|(-hydrater)|(\.anyfetch\.com)/)[0]] = ghrepo.name;
-        }
-
-        cb();
-      });
-    }, function(err) {
-      if(err) {
-        throw err;
-      }
-
-      console.log("End of init apps");
-    });
-  });
-}
-
-initApps();
 
 function generateMessage(name, diff, commits) {
   var messageRepo = '';
@@ -69,15 +35,13 @@ function generateMessage(name, diff, commits) {
   messageRepo += name + ' ' + commits.length + ' commits behind ( https://github.com/' + name + '/compare/' + diff + ' )' + "\n";
 
   commits.forEach(function(commit) {
-    messageRepo +=  "\t" + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + " (" + commit.author.login + ")\n";
+    messageRepo += "\t" + commit.sha.slice(0, 7) + ": " + commit.commit.message.split('\n')[0] + " (" + commit.author.login + ")\n";
   });
 
   return messageRepo;
 }
 
-function sendStatusFor(env, msg, cb) {
-  var diff = env === 'staging' ? 'staging...master' : 'production...staging';
-
+function sendStatusFor(diff, apps, msg, cb) {
   var message = '';
   var messageRepos = [];
 
@@ -85,8 +49,8 @@ function sendStatusFor(env, msg, cb) {
 
   message += "Comparing " + diff + " ";
 
-  async.eachLimit(Object.keys(config.apps), 10, function(name, cb) {
-    var ghrepo = client.repo(config.apps[name]);
+  async.eachLimit(apps, 10, function(name, cb) {
+    var ghrepo = client.repo(name);
 
     ghrepo.compare(diff, function(err, commits) {
       if(err) {
@@ -129,52 +93,23 @@ module.exports = function initStatus(robot) {
     var env = (msg.match[2] || 'all').toLowerCase();
 
     if(env === 'all') {
-      return async.eachSeries(['staging', 'production'], function(env, cb) {
-        sendStatusFor(env, msg, cb);
+      return async.eachSeries(['staging...master', 'production...staging'], function(diff, cb) {
+        sendStatusFor(diff, utils.getRepoNames(Object.keys(config.apps)), msg, cb);
       }, function() {});
     }
 
-    sendStatusFor(env, msg, function() {});
+    sendStatusFor(env === 'staging' ? 'staging...master' : 'production...staging', utils.getRepoNames(Object.keys(config.apps)), msg, function() {});
   });
 
   robot.respond(/status of (.+)\s*$/i, function(msg) {
-    var app = msg.match[1].trim().toLowerCase();
+    var apps = utils.generateAppsList([msg.match[1].trim().toLowerCase()]);
 
-    if(!config.apps[app]) {
-      return msg.send("Unknown app `" + app + "`");
+    if(apps instanceof Error) {
+      return msg.send(apps.toString());
     }
 
-    var ghrepo = client.repo(config.apps[app]);
-    var messages = {};
-
-    async.eachSeries(['staging...master', 'production...staging'], function(diff, cb) {
-      ghrepo.compare(diff, function(err, commits) {
-        if(err) {
-          console.warn(ghrepo.name, err);
-          return cb(new Error(ghrepo.name + ": " + err.toString()));
-        }
-
-        if(commits.length === 0) {
-          messages[diff] = "Everything up-to-date\n";
-          return cb();
-        }
-
-        messages[diff] = generateMessage(ghrepo.name, diff, commits);
-        cb();
-      });
-    }, function(err) {
-      if(err) {
-        return msg.send(err.toString());
-      }
-
-      var message = '';
-
-      Object.keys(messages).sort().forEach(function(diff) {
-        message += "Comparing " + diff;
-        message += "\n" + messages[diff] + "\n";
-      });
-
-      msg.send(message);
-    });
+    return async.eachSeries(['staging...master', 'production...staging'], function(diff, cb) {
+      sendStatusFor(diff, utils.getRepoNames(apps), msg, cb);
+    }, function() {});
   });
 };
