@@ -90,7 +90,8 @@ function sendStatusFor(env, msg, cb) {
 
     ghrepo.compare(diff, function(err, commits) {
       if(err) {
-        return cb(err);
+        console.warn(ghrepo.name, err);
+        return cb(new Error(ghrepo.name + ": " + err.toString()));
       }
 
       if(commits.length === 0) {
@@ -148,7 +149,6 @@ module.exports = function initStatus(robot) {
 
     async.eachSeries(['staging...master', 'production...staging'], function(diff, cb) {
       ghrepo.compare(diff, function(err, commits) {
-        console.log("REPO:", ghrepo.name, diff);
         if(err) {
           console.warn(ghrepo.name, err);
           return cb(new Error(ghrepo.name + ": " + err.toString()));
