@@ -149,7 +149,7 @@ module.exports = function initStatus(robot) {
     async.eachSeries(['staging...master', 'production...staging'], function(diff, cb) {
       ghrepo.compare(diff, function(err, commits) {
         if(err) {
-          return cb(err);
+          return cb(new Error(ghrepo.name + ": " + err.toString()));
         }
 
         if(commits.length === 0) {
