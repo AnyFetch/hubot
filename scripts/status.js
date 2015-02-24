@@ -46,7 +46,7 @@ function initApps() {
         });
 
         if(tags.indexOf('staging') !== -1) {
-          config.apps[repo.name.split(/\.|-/)[0]] = ghrepo.name;
+          config.apps[repo.name.split(/(-provider)|(-hydrater)|(\.anyfetch\.com)/)[0]] = ghrepo.name;
         }
 
         cb();
