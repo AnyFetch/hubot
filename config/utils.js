@@ -31,13 +31,9 @@ module.exports.generateAppsList = function(apps) {
 };
 
 module.exports.getRepoNames = function(apps) {
-  var newApps = [];
-
-  apps.forEach(function(app) {
-    newApps.push(config.apps[app]);
+  return apps.map(function(app) {
+    return config.apps[app];
   });
-
-  return newApps;
 };
 
 /*
