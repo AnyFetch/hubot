@@ -54,8 +54,13 @@ function sendStatusFor(diff, apps, msg, cb) {
 
     ghrepo.compare(diff, function(err, commits) {
       if(err) {
-        console.warn(ghrepo.name, err);
-        return cb(new Error(ghrepo.name + ": " + err.toString()));
+        if(err.toString().match(/Not Found/)) {
+          message += "\n Not in production or staging: nothing to compare\n";
+        }
+        else {
+          console.warn(ghrepo.name, err);
+          return cb(new Error(ghrepo.name + ": " + err.toString()));
+        }
       }
 
       if(commits.length === 0) {

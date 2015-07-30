@@ -41,7 +41,7 @@ module.exports.getRepoNames = function(apps) {
  */
 function initApps() {
   console.log("Start of init apps");
-  var ghorg = client.org('Anyfetch');
+  var ghorg = client.org('AnyFetch');
 
   ghorg.repos({
     page: 1,
